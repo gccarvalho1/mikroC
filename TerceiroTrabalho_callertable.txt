@@ -1,0 +1,28 @@
+main
+	PWM1_Init
+	ADC_Init
+	UART1_Init
+	Lcd_Init
+		Delay_5500us
+		Delay_1us
+	Lcd_Cmd
+		Delay_1us
+		Delay_5500us
+		Delay_50us
+	Lcd_Out
+		Lcd_Cmd
+			Delay_1us
+			Delay_5500us
+			Delay_50us
+		Lcd_Chr_CP
+			Lcd_Cmd
+				Delay_1us
+				Delay_5500us
+				Delay_50us
+	UART1_Read
+	ByteToStr
+		Div_8x8_U
+	UART1_Write
+interrupt
+	ADC_Read
+		Delay_22us

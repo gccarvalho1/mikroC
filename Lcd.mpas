@@ -1,0 +1,101 @@
+{*
+ * Project name:
+     Segundo trabalho de Microcontroladores
+ *}
+
+program Lcd;
+
+// LCD module connections
+var LCD_RS : sbit  at RE2_bit;
+var LCD_EN : sbit  at RE1_bit;
+var LCD_D4 : sbit  at RD4_bit;
+var LCD_D5 : sbit  at RD5_bit;
+var LCD_D6 : sbit  at RD6_bit;
+var LCD_D7 : sbit  at RD7_bit;
+
+var LCD_RS_Direction : sbit at TRISE2_bit;
+var LCD_EN_Direction : sbit at TRISE1_bit;
+var LCD_D4_Direction : sbit at TRISD4_bit;
+var LCD_D5_Direction : sbit at TRISD5_bit;
+var LCD_D6_Direction : sbit at TRISD6_bit;
+var LCD_D7_Direction : sbit at TRISD7_bit;
+// End LCD module connections
+
+var txt1 : array[16] of char;
+    txt2 : array[15]  of char;
+    txt3 : array[8]  of char;
+    txt4 : array[7]  of char;
+    mov :  array[50]  of char;
+    i , j ,g , h: byte;
+    tmp , aux : word;
+
+
+
+procedure interrupt();
+  begin
+    PIR1.RCIF:=0;
+    PIR1.TMR1IF:=0;
+    
+    for g:= 0 to 49 do
+        begin
+        mov[g]:= ADC_Read(0);
+        delay_ms(1);
+        end;
+  end;
+
+  begin
+
+
+    txt1 := 'Terceiro Trabalho';
+    txt2 := 'MicroControlador';
+    txt3 := '';
+    txt4 := 'Exemplo';
+    
+    PWM1_Init(5000);
+    j:= 0;
+    i:= 0;
+    TRISC :=0;
+    PORTC := %00000000;
+    ADC_Init();
+    UART1_Init(9600);
+    Lcd_Init();                        // Initialize LCD
+    Lcd_Cmd(_LCD_CLEAR);               // Clear display
+    Lcd_Cmd(_LCD_CURSOR_OFF);          // Cursor off
+    LCD_Out(1,6,txt3);                 // Write text in first row
+    LCD_Out(2,6,txt4);                 // Write text in second row
+    Delay_ms(2000);
+    Lcd_Cmd(_LCD_CLEAR);               // Clear display
+
+    LCD_Out(1,1,txt1);
+    Delay_ms(2000);                 // Write text in first row
+    Lcd_Cmd(_LCD_CLEAR);
+
+    TRISB :=0;
+    PORTB := %00000000;
+    g:= 0;
+
+    //Sound_init(PORTC,1);         // Seta o buzzer da portc.1
+
+    INTCON.GIE:=1;
+    INTCON.PEIE:=1;
+    PIE1.RCIE:=1;
+    TMR1H := 0;
+    TMR1L := 0;
+    T1CON := 0;
+
+
+    while TRUE do                      // Endless loop
+      begin
+      LCD_Out(2,1,txt2);
+      i:= UART1_Read;
+      if i='L' then
+      begin
+      for j:= 0 to 49 do
+      begin
+      bytetostr(j, txt1);
+      LCD_Out(1,1, txt1);
+      UART1_Write(mov[j]);
+      end;
+      end;
+      end;
+  end.
